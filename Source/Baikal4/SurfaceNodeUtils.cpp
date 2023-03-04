@@ -92,29 +92,34 @@ int32 USurfaceNodeUtils::countColumns(FString line, int32 lineNumber, TArray<FVe
 
 void USurfaceNodeUtils::addVertex(int32 x, int32 y, int32 z, TArray<FVector>& coordinates, TArray<FLinearColor>& vertexColors)
 {
-	coordinates.Add(FVector(double(x * 50), double(y * 50), double(z)));
+	coordinates.Add(FVector(x * 50, y * 50, z));
 	vertexColors.Add(getColor(z - 430));
 }
 
-FLinearColor USurfaceNodeUtils::getColor(int32 z)
+FLinearColor USurfaceNodeUtils::getColor(double z)
 {
 	// max for baical expected : 2700 - 430 (2270);
 	// min for baical expected : -1198 - 430 (-1628);
 	FLinearColor color;
 	if (z > 0) {
-		if (z > 1000) {
-			color = FLinearColor(0.5, 0.4, 0.2);
+		if (z > 700) {
+			if (z > 1500) {
+				color = FLinearColor(0.9, 0.9, 0.9);
+			}
+			else {
+				color = FLinearColor(0.5, 0.5 - 0.35 * ((z - 700) / 800), 0.05);
+			}
 		}
 		else {
-			color = FLinearColor(0, 1, 0);
+			color = FLinearColor(0.15 + 0.45 * (z / 700), 0.6, 0.1);
 		}
 	}
 	else {
-		if (z < -800) {
-			color = FLinearColor(0.5 * (1 - z / -800), 0.5 * (1 - z / -800), 0.25 * (1 - z / -800) + 0.75);
+		if (z > -800) {
+			color = FLinearColor(0.3 * (1 - z / -800), 0.3 * (1 - z / -800), 0.25 * (1 - z / -800) + 0.75);
 		}
 		else {
-			color = FLinearColor(0, 0, 0.25 + (1 - z / -800) * 0.75);
+			color = FLinearColor(0, 0, 0.25 + (1 - (z + 800) / -850) * 0.75);
 		}
 	}
 	return color;

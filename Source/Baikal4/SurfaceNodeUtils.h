@@ -30,5 +30,5 @@ class BAIKAL4_API USurfaceNodeUtils : public UBlueprintFunctionLibrary
 
 		static void addVertex(int32 x, int32 y, int32 z, TArray<FVector>& coordinates, TArray<FLinearColor>& vertexColors);
 
-		static FLinearColor getColor(int32 z);
+		static FLinearColor getColor(double z);
 };
