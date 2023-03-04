@@ -5,8 +5,12 @@
 
 using namespace std;
 
-void USurfaceNodeUtils::getNodes(FString userDir, TArray<FVector>& coordinates, TArray<int32>& triangles)
-{
+void USurfaceNodeUtils::getNodes(
+	FString userDir,
+	TArray<FVector>& coordinates,
+	TArray<int32>& triangles,
+	TArray<FLinearColor>& vertexColors
+) {
 	TArray<FString> lines = TArray<FString>();
 	FFileHelper::LoadFileToStringArray(lines, *fileName(userDir));
 
@@ -17,7 +21,7 @@ void USurfaceNodeUtils::getNodes(FString userDir, TArray<FVector>& coordinates, 
 	int32 columnCounter = 0;
 	for (FString line : lines)
 	{
-		columnCounter = countColumns(line, lineCounter, coordinates);
+		columnCounter = countColumns(line, lineCounter, coordinates, vertexColors);
 		lineCounter++;
 	}
 
@@ -28,17 +32,17 @@ void USurfaceNodeUtils::getNodes(FString userDir, TArray<FVector>& coordinates, 
 	for (int i = 0; i < lineCounter - 1; i++) {
 		for (int j = 0; j < columnCounter - 1; j++) {
 			//first triangle
-			triangles.Add((i + 1) * columnCounter + j);
 			triangles.Add(i * columnCounter + j);
+			triangles.Add((i + 1) * columnCounter + j);
 			triangles.Add(i * columnCounter + (j + 1));
 			//second triangle
-			triangles.Add((i + 1) * columnCounter + j);
 			triangles.Add(i * columnCounter + (j + 1));
+			triangles.Add((i + 1) * columnCounter + j);
 			triangles.Add((i + 1) * columnCounter + (j + 1));
 		}
 	}
 	UE_LOG(LogTemp, Display, TEXT("nodes numbers in triangles count is: %d"), triangles.Num());
-	
+
 	return;
 }
 
@@ -71,7 +75,7 @@ FString USurfaceNodeUtils::fileName(FString userDir)
 	return FString(userDir + ".Baikal/Example.txt");
 }
 
-int32 USurfaceNodeUtils::countColumns(FString line, int32 lineNumber, TArray<FVector>& coordinates)
+int32 USurfaceNodeUtils::countColumns(FString line, int32 lineNumber, TArray<FVector>& coordinates, TArray<FLinearColor>& vertexColors)
 {
 	FString leftPart = FString();
 	FString lineCopy = FString(line);
@@ -79,10 +83,40 @@ int32 USurfaceNodeUtils::countColumns(FString line, int32 lineNumber, TArray<FVe
 	while (lineCopy.Contains(" "))
 	{
 		lineCopy.Split(FString(" "), &leftPart, &lineCopy);
-		coordinates.Add(FVector(double(lineNumber * 50), double(counter * 50), FCString::Atod(*leftPart)));
+		addVertex(lineNumber, -counter, FCString::Atoi(*lineCopy), coordinates, vertexColors);
 		counter++;
 	}
-	coordinates.Add(FVector(double(lineNumber * 50), double(counter * 50), FCString::Atod(*lineCopy)));
+	addVertex(lineNumber, -counter, FCString::Atoi(*lineCopy), coordinates, vertexColors);
 	return ++counter;
+}
+
+void USurfaceNodeUtils::addVertex(int32 x, int32 y, int32 z, TArray<FVector>& coordinates, TArray<FLinearColor>& vertexColors)
+{
+	coordinates.Add(FVector(double(x * 50), double(y * 50), double(z)));
+	vertexColors.Add(getColor(z - 430));
+}
+
+FLinearColor USurfaceNodeUtils::getColor(int32 z)
+{
+	// max for baical expected : 2700 - 430 (2270);
+	// min for baical expected : -1198 - 430 (-1628);
+	FLinearColor color;
+	if (z > 0) {
+		if (z > 1000) {
+			color = FLinearColor(0.5, 0.4, 0.2);
+		}
+		else {
+			color = FLinearColor(0, 1, 0);
+		}
+	}
+	else {
+		if (z < -800) {
+			color = FLinearColor(0.5 * (1 - z / -800), 0.5 * (1 - z / -800), 0.25 * (1 - z / -800) + 0.75);
+		}
+		else {
+			color = FLinearColor(0, 0, 0.25 + (1 - z / -800) * 0.75);
+		}
+	}
+	return color;
 }
 

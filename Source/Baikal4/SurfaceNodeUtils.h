@@ -16,7 +16,7 @@ class BAIKAL4_API USurfaceNodeUtils : public UBlueprintFunctionLibrary
 
 
 		UFUNCTION(BlueprintCallable, Category = "Surface")
-		static void getNodes(FString userDir, TArray<FVector>& coordinates, TArray<int32>& triangles);
+		static void getNodes(FString userDir, TArray<FVector>& coordinates, TArray<int32>& triangles, TArray<FLinearColor>& vertexColors);
 
 		UFUNCTION(BlueprintCallable, Category = "Surface")
 		static bool checkCoordinatesFile(FString userDir);
@@ -26,5 +26,9 @@ class BAIKAL4_API USurfaceNodeUtils : public UBlueprintFunctionLibrary
 
 		static FString fileName(FString userDir);
 
-		static int32 countColumns(FString column, int32 lineNumber, TArray<FVector>& coordinates);
+		static int32 countColumns(FString column, int32 lineNumber, TArray<FVector>& coordinates, TArray<FLinearColor>& vertexColors);
+
+		static void addVertex(int32 x, int32 y, int32 z, TArray<FVector>& coordinates, TArray<FLinearColor>& vertexColors);
+
+		static FLinearColor getColor(int32 z);
 };
