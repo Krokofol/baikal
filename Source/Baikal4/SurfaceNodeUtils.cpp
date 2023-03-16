@@ -19,15 +19,20 @@ void USurfaceNodeUtils::getNodes(
 
 	int32 lineCounter = 0;
 	int32 columnCounter = 0;
+	int32 nodesCounter = 0;
 	for (FString line : lines)
 	{
 		columnCounter = countColumns(line, lineCounter, coordinates, vertexColors);
 		lineCounter++;
 	}
+	for (FVector node : coordinates) 
+	{
+		nodesCounter++;
+	}
 
 	UE_LOG(LogTemp, Display, TEXT("node lines count is: %d"), lineCounter);
 	UE_LOG(LogTemp, Display, TEXT("node columns count is: %d"), columnCounter);
-	UE_LOG(LogTemp, Display, TEXT("nodes count is: % d"), coordinates.Num());
+	UE_LOG(LogTemp, Display, TEXT("nodes count is: % d"), nodesCounter);
 
 	for (int i = 0; i < lineCounter - 1; i++) {
 		for (int j = 0; j < columnCounter - 1; j++) {
@@ -77,8 +82,15 @@ FString USurfaceNodeUtils::fileName(FString userDir)
 
 int32 USurfaceNodeUtils::countColumns(FString line, int32 lineNumber, TArray<FVector>& coordinates, TArray<FLinearColor>& vertexColors)
 {
-	FString leftPart = FString();
-	FString lineCopy = FString(line);
+	FString leftPart;
+	FString lineCopy;
+	if (line.StartsWith(" ")) {
+		line.Split(FString(" "), &leftPart, &lineCopy);
+	}
+	else {
+		lineCopy = FString(line);
+	}
+
 	int32 counter = 0;
 	while (lineCopy.Contains(" "))
 	{
