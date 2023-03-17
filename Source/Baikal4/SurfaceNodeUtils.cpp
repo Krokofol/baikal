@@ -9,7 +9,6 @@ void USurfaceNodeUtils::getNodes(
 	FString userDir,
 	int32 horizontalScale,
 	TArray<FVector>& coordinates,
-	TArray<FLinearColor>& vertexColors,
 	int32& nodesCountX,
 	int32& nodesCountY
 ) {
@@ -23,7 +22,7 @@ void USurfaceNodeUtils::getNodes(
 	int32 nodesCounter = 0;
 	for (FString line : lines)
 	{
-		nodesCountY = countColumns(line, nodesCountX, horizontalScale, coordinates, vertexColors);
+		nodesCountY = countColumns(line, nodesCountX, horizontalScale, coordinates);
 		nodesCountX++;
 	}
 	for (FVector node : coordinates) 
@@ -85,12 +84,46 @@ void USurfaceNodeUtils::createDefaultCoordintatesFile(FString userDir)
 	return;
 }
 
+TArray<FVector> USurfaceNodeUtils::takeEach(
+	int32 x1, int32 y1, int32 x2, int32 y2, 
+	TArray<FVector> nodes, 
+	int32 skip,
+	int32 nodesCountX,
+	int32 nodesCountY
+) {
+	TArray<FVector> actualNodes = TArray<FVector>();
+	int32 minX = min(x1, x2);
+	int32 maxX = max(x1, x2);
+	int32 minY = min(y1, y2);
+	int32 maxY = max(y1, y2);
+	
+	for (int i = minX; i <= maxX; i++) {
+		for (int j = minY; j <= maxY; j++) {
+			if ((i - minX) % skip == 0 && (j - minY) % skip == 0) {
+				actualNodes.Add(nodes[nodesCountY * i + j]);
+			}
+		}
+	}
+
+	return actualNodes;
+}
+
+TArray<FLinearColor> USurfaceNodeUtils::colorVertexes(TArray<FVector> nodes)
+{
+	TArray<FLinearColor> colors = TArray<FLinearColor>();
+	for (FVector node : nodes)
+	{
+		colors.Add(getColor(node.Z - 430));
+	}
+	return colors;
+}
+
 FString USurfaceNodeUtils::fileName(FString userDir)
 {
 	return FString(userDir + ".Baikal/Example.txt");
 }
 
-int32 USurfaceNodeUtils::countColumns(FString line, int32 lineNumber, int32 horizontalScale, TArray<FVector>& coordinates, TArray<FLinearColor>& vertexColors)
+int32 USurfaceNodeUtils::countColumns(FString line, int32 lineNumber, int32 horizontalScale, TArray<FVector>& coordinates)
 {
 	FString leftPart;
 	FString lineCopy;
@@ -105,17 +138,16 @@ int32 USurfaceNodeUtils::countColumns(FString line, int32 lineNumber, int32 hori
 	while (lineCopy.Contains(" "))
 	{
 		lineCopy.Split(FString(" "), &leftPart, &lineCopy);
-		addVertex(lineNumber, -counter, FCString::Atoi(*lineCopy), horizontalScale, coordinates, vertexColors);
+		addVertex(lineNumber, -counter, FCString::Atoi(*leftPart), horizontalScale, coordinates);
 		counter++;
 	}
-	addVertex(lineNumber, -counter, FCString::Atoi(*lineCopy), horizontalScale, coordinates, vertexColors);
+	addVertex(lineNumber, -counter, FCString::Atoi(*lineCopy), horizontalScale, coordinates);
 	return ++counter;
 }
 
-void USurfaceNodeUtils::addVertex(int32 x, int32 y, int32 z, int32 horizontalScale, TArray<FVector>& coordinates, TArray<FLinearColor>& vertexColors)
+void USurfaceNodeUtils::addVertex(int32 x, int32 y, int32 z, int32 horizontalScale, TArray<FVector>& coordinates)
 {
 	coordinates.Add(FVector(x * horizontalScale, y * horizontalScale, z));
-	vertexColors.Add(getColor(z - 430));
 }
 
 FLinearColor USurfaceNodeUtils::getColor(double z)

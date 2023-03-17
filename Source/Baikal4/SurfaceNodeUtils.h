@@ -20,7 +20,6 @@ class BAIKAL4_API USurfaceNodeUtils : public UBlueprintFunctionLibrary
 			FString userDir,
 			int32 horizontalScale,
 			TArray<FVector>& coordinates,
-			TArray<FLinearColor>& vertexColors,
 			int32& nodesCountX,
 			int32& nodesCountY
 		);
@@ -38,21 +37,31 @@ class BAIKAL4_API USurfaceNodeUtils : public UBlueprintFunctionLibrary
 		UFUNCTION(BlueprintCallable, Category = "Surface")
 		static void createDefaultCoordintatesFile(FString userDir);
 
+		UFUNCTION(BlueprintCallable, Category = "Surface")
+		static TArray<FVector> takeEach(
+			int32 x1, int32 y1, int32 x2, int32 y2,
+			TArray<FVector> nodes,
+			int32 skip,
+			int32 nodesCountX,
+			int32 nodesCountY
+		);
+
+		UFUNCTION(BlueprintCallable, Category = "Surface")
+		static TArray<FLinearColor> colorVertexes(TArray<FVector> nodes);
+
 		static FString fileName(FString userDir);
 
 		static int32 countColumns(
 			FString column, 
 			int32 lineNumber, 
 			int32 horizontalScale, 
-			TArray<FVector>& coordinates, 
-			TArray<FLinearColor>& vertexColors
+			TArray<FVector>& coordinates
 		);
 
 		static void addVertex(
 			int32 x, int32 y, int32 z, 
 			int32 horizontalScale, 
-			TArray<FVector>& coordinates, 
-			TArray<FLinearColor>& vertexColors
+			TArray<FVector>& coordinates
 		);
 
 		static FLinearColor getColor(double z);
