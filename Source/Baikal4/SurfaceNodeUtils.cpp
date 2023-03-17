@@ -7,49 +7,59 @@ using namespace std;
 
 void USurfaceNodeUtils::getNodes(
 	FString userDir,
+	int32 horizontalScale,
 	TArray<FVector>& coordinates,
-	TArray<int32>& triangles,
-	TArray<FLinearColor>& vertexColors
+	TArray<FLinearColor>& vertexColors,
+	int32& nodesCountX,
+	int32& nodesCountY
 ) {
 	TArray<FString> lines = TArray<FString>();
 	FFileHelper::LoadFileToStringArray(lines, *fileName(userDir));
 
 	coordinates = TArray<FVector>();
-	triangles = TArray<int32>();
 
-	int32 lineCounter = 0;
-	int32 columnCounter = 0;
+	nodesCountX = 0;
+	nodesCountY = 0;
 	int32 nodesCounter = 0;
 	for (FString line : lines)
 	{
-		columnCounter = countColumns(line, lineCounter, coordinates, vertexColors);
-		lineCounter++;
+		nodesCountY = countColumns(line, nodesCountX, horizontalScale, coordinates, vertexColors);
+		nodesCountX++;
 	}
 	for (FVector node : coordinates) 
 	{
 		nodesCounter++;
 	}
-
-	UE_LOG(LogTemp, Display, TEXT("node lines count is: %d"), lineCounter);
-	UE_LOG(LogTemp, Display, TEXT("node columns count is: %d"), columnCounter);
+	UE_LOG(LogTemp, Display, TEXT("node lines count is: %d"), nodesCountX);
+	UE_LOG(LogTemp, Display, TEXT("node columns count is: %d"), nodesCountY);
 	UE_LOG(LogTemp, Display, TEXT("nodes count is: % d"), nodesCounter);
-
-	for (int i = 0; i < lineCounter - 1; i++) {
-		for (int j = 0; j < columnCounter - 1; j++) {
-			//first triangle
-			triangles.Add(i * columnCounter + j);
-			triangles.Add((i + 1) * columnCounter + j);
-			triangles.Add(i * columnCounter + (j + 1));
-			//second triangle
-			triangles.Add(i * columnCounter + (j + 1));
-			triangles.Add((i + 1) * columnCounter + j);
-			triangles.Add((i + 1) * columnCounter + (j + 1));
-		}
-	}
-	UE_LOG(LogTemp, Display, TEXT("nodes numbers in triangles count is: %d"), triangles.Num());
 
 	return;
 }
+
+void USurfaceNodeUtils::generateTriangles(
+	int32 nodesCountX,
+	int32 nodesCountY,
+	TArray<int32>& triangles
+) {
+	triangles = TArray<int32>();
+	for (int i = 0; i < nodesCountX - 1; i++) {
+		for (int j = 0; j < nodesCountY - 1; j++) {
+			//first triangle
+			triangles.Add(i * nodesCountY + j);
+			triangles.Add((i + 1) * nodesCountY + j);
+			triangles.Add(i * nodesCountY + (j + 1));
+			//second triangle
+			triangles.Add(i * nodesCountY + (j + 1));
+			triangles.Add((i + 1) * nodesCountY + j);
+			triangles.Add((i + 1) * nodesCountY + (j + 1));
+		}
+	}
+	UE_LOG(LogTemp, Display, TEXT("nodes numbers in triangles count is: %d"), triangles.Num());
+	return;
+}
+
+
 
 bool USurfaceNodeUtils::checkCoordinatesFile(FString userDir)
 {
@@ -80,7 +90,7 @@ FString USurfaceNodeUtils::fileName(FString userDir)
 	return FString(userDir + ".Baikal/Example.txt");
 }
 
-int32 USurfaceNodeUtils::countColumns(FString line, int32 lineNumber, TArray<FVector>& coordinates, TArray<FLinearColor>& vertexColors)
+int32 USurfaceNodeUtils::countColumns(FString line, int32 lineNumber, int32 horizontalScale, TArray<FVector>& coordinates, TArray<FLinearColor>& vertexColors)
 {
 	FString leftPart;
 	FString lineCopy;
@@ -95,16 +105,16 @@ int32 USurfaceNodeUtils::countColumns(FString line, int32 lineNumber, TArray<FVe
 	while (lineCopy.Contains(" "))
 	{
 		lineCopy.Split(FString(" "), &leftPart, &lineCopy);
-		addVertex(lineNumber, -counter, FCString::Atoi(*lineCopy), coordinates, vertexColors);
+		addVertex(lineNumber, -counter, FCString::Atoi(*lineCopy), horizontalScale, coordinates, vertexColors);
 		counter++;
 	}
-	addVertex(lineNumber, -counter, FCString::Atoi(*lineCopy), coordinates, vertexColors);
+	addVertex(lineNumber, -counter, FCString::Atoi(*lineCopy), horizontalScale, coordinates, vertexColors);
 	return ++counter;
 }
 
-void USurfaceNodeUtils::addVertex(int32 x, int32 y, int32 z, TArray<FVector>& coordinates, TArray<FLinearColor>& vertexColors)
+void USurfaceNodeUtils::addVertex(int32 x, int32 y, int32 z, int32 horizontalScale, TArray<FVector>& coordinates, TArray<FLinearColor>& vertexColors)
 {
-	coordinates.Add(FVector(x * 50, y * 50, z));
+	coordinates.Add(FVector(x * horizontalScale, y * horizontalScale, z));
 	vertexColors.Add(getColor(z - 430));
 }
 
