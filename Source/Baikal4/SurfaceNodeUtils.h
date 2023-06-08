@@ -51,12 +51,11 @@ class BAIKAL4_API USurfaceNodeUtils : public UBlueprintFunctionLibrary
 
 		static FString fileName(FString userDir);
 
-		static int32 countColumns(
-			FString column, 
-			int32 lineNumber, 
-			int32 horizontalScale, 
-			TArray<FVector>& coordinates
-		);
+		static int32 countColumns(FString line);
+
+		static void getVertexes(TArray<FString> lines, int32 countX, int32 countY, int32 horizontalScale, TArray<FVector>& coordinates);
+
+		static void addLineVertexes(int32 x, FString line, int32 countX, int32 countY, int32 horizontalScale, TArray<FVector>& vertexes);
 
 		static void addVertex(
 			int32 x, int32 y, int32 z, 

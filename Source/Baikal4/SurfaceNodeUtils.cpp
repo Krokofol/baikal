@@ -15,23 +15,15 @@ void USurfaceNodeUtils::getNodes(
 	TArray<FString> lines = TArray<FString>();
 	FFileHelper::LoadFileToStringArray(lines, *fileName(userDir));
 
-	coordinates = TArray<FVector>();
-
-	nodesCountX = 0;
-	nodesCountY = 0;
+	nodesCountX = lines.Num();
+	nodesCountY = countColumns(lines[0]);
 	int32 nodesCounter = 0;
-	for (FString line : lines)
-	{
-		nodesCountY = countColumns(line, nodesCountX, horizontalScale, coordinates);
-		nodesCountX++;
-	}
-	for (FVector node : coordinates) 
-	{
-		nodesCounter++;
-	}
+
+	getVertexes(lines, nodesCountX, nodesCountY, horizontalScale, coordinates);
+
 	UE_LOG(LogTemp, Display, TEXT("node lines count is: %d"), nodesCountX);
 	UE_LOG(LogTemp, Display, TEXT("node columns count is: %d"), nodesCountY);
-	UE_LOG(LogTemp, Display, TEXT("nodes count is: % d"), nodesCounter);
+	UE_LOG(LogTemp, Display, TEXT("nodes count is: % d"), coordinates.Num());
 
 	return;
 }
@@ -44,11 +36,19 @@ void USurfaceNodeUtils::generateTriangles(
 	triangles = TArray<int32>();
 	for (int i = 0; i < nodesCountX - 1; i++) {
 		for (int j = 0; j < nodesCountY - 1; j++) {
-			//first triangle
+			//first triangle (1)
+			triangles.Add(i * nodesCountY + j);
+			triangles.Add(i * nodesCountY + (j + 1));
+			triangles.Add((i + 1) * nodesCountY + j);
+			//second triangle (2)
+			triangles.Add(i * nodesCountY + (j + 1));
+			triangles.Add((i + 1) * nodesCountY + (j + 1));
+			triangles.Add((i + 1) * nodesCountY + j);
+			//first triangle (1, backside)
 			triangles.Add(i * nodesCountY + j);
 			triangles.Add((i + 1) * nodesCountY + j);
 			triangles.Add(i * nodesCountY + (j + 1));
-			//second triangle
+			//second triangle (2, backside)
 			triangles.Add(i * nodesCountY + (j + 1));
 			triangles.Add((i + 1) * nodesCountY + j);
 			triangles.Add((i + 1) * nodesCountY + (j + 1));
@@ -123,26 +123,30 @@ FString USurfaceNodeUtils::fileName(FString userDir)
 	return FString(userDir + ".Baikal/Example.txt");
 }
 
-int32 USurfaceNodeUtils::countColumns(FString line, int32 lineNumber, int32 horizontalScale, TArray<FVector>& coordinates)
-{
-	FString leftPart;
-	FString lineCopy;
-	if (line.StartsWith(" ")) {
-		line.Split(FString(" "), &leftPart, &lineCopy);
-	}
-	else {
-		lineCopy = FString(line);
-	}
+int32 USurfaceNodeUtils::countColumns(FString line) {
+	int32 result = 0;
+	for (TCHAR symbol: line.GetCharArray())
+		if (symbol == TCHAR(' '))
+			result++;
+	return ++result;
+}
 
-	int32 counter = 0;
-	while (lineCopy.Contains(" "))
-	{
-		lineCopy.Split(FString(" "), &leftPart, &lineCopy);
-		addVertex(lineNumber, -counter, FCString::Atoi(*leftPart), horizontalScale, coordinates);
-		counter++;
+void USurfaceNodeUtils::getVertexes(TArray<FString> lines, int32 countX, int32 countY, int32 horizontalScale, TArray<FVector>& coordinates)
+{
+	coordinates = TArray<FVector>();
+	for (int32 x = 0; x < lines.Num(); x++) {
+		addLineVertexes(x, lines[x], countX, countY, horizontalScale, coordinates);
 	}
-	addVertex(lineNumber, -counter, FCString::Atoi(*lineCopy), horizontalScale, coordinates);
-	return ++counter;
+}
+
+void USurfaceNodeUtils::addLineVertexes(int32 x, FString line, int32 countX, int32 countY, int32 horizontalScale, TArray<FVector>& vertexes)
+{
+	TArray<FString> digits;
+	line.ParseIntoArray(digits, *FString(" "));
+	for (int32 y = 0; y < digits.Num(); y++) {
+		int32 z = FCString::Atoi(*digits[y]);
+		addVertex(x - countX / 2, y - countY / 2, z, horizontalScale, vertexes);
+	}
 }
 
 void USurfaceNodeUtils::addVertex(int32 x, int32 y, int32 z, int32 horizontalScale, TArray<FVector>& coordinates)
