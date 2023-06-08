@@ -2,6 +2,8 @@
 
 
 #include "SurfaceNodeUtils.h"
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -34,26 +36,24 @@ void USurfaceNodeUtils::generateTriangles(
 	TArray<int32>& triangles
 ) {
 	triangles = TArray<int32>();
-	for (int i = 0; i < nodesCountX - 1; i++) {
-		for (int j = 0; j < nodesCountY - 1; j++) {
+	ofstream myfile;
+	myfile.open("C:/Autodesk/example.txt");
+
+	for (int x = 0; x < nodesCountX - 1; x++) {
+		for (int y = 0; y < nodesCountY - 1; y++) {
 			//first triangle (1)
-			triangles.Add(i * nodesCountY + j);
-			triangles.Add(i * nodesCountY + (j + 1));
-			triangles.Add((i + 1) * nodesCountY + j);
-			//second triangle (2)
-			triangles.Add(i * nodesCountY + (j + 1));
-			triangles.Add((i + 1) * nodesCountY + (j + 1));
-			triangles.Add((i + 1) * nodesCountY + j);
-			//first triangle (1, backside)
-			triangles.Add(i * nodesCountY + j);
-			triangles.Add((i + 1) * nodesCountY + j);
-			triangles.Add(i * nodesCountY + (j + 1));
+			triangles.Add(x * nodesCountY + y);
+			triangles.Add((x + 1) * nodesCountY + y);
+			triangles.Add(x * nodesCountY + (y + 1));
+			myfile << x * nodesCountY + y << ";" << (x + 1)* nodesCountY + y << ";" << x * nodesCountY + (y + 1) << "\n";
 			//second triangle (2, backside)
-			triangles.Add(i * nodesCountY + (j + 1));
-			triangles.Add((i + 1) * nodesCountY + j);
-			triangles.Add((i + 1) * nodesCountY + (j + 1));
+			triangles.Add(x * nodesCountY + (y + 1));
+			triangles.Add((x + 1) * nodesCountY + y);
+			triangles.Add((x + 1) * nodesCountY + (y + 1));
+			myfile << x * nodesCountY + (y + 1) << ";" << (x + 1) * nodesCountY + y << ";" << (x + 1) * nodesCountY + (y + 1) << "\n";
 		}
 	}
+	myfile.close();
 	UE_LOG(LogTemp, Display, TEXT("nodes numbers in triangles count is: %d"), triangles.Num());
 	return;
 }
@@ -145,7 +145,7 @@ void USurfaceNodeUtils::addLineVertexes(int32 x, FString line, int32 countX, int
 	line.ParseIntoArray(digits, *FString(" "));
 	for (int32 y = 0; y < digits.Num(); y++) {
 		int32 z = FCString::Atoi(*digits[y]);
-		addVertex(x - countX / 2, y - countY / 2, z, horizontalScale, vertexes);
+		addVertex(x - countX / 2, - y + countY / 2, z, horizontalScale, vertexes);
 	}
 }
 
