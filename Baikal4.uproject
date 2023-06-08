@@ -44,5 +44,9 @@
 				"Win64"
 			]
 		}
+	],
+	"TargetPlatforms": [
+		"HoloLens",
+		"Windows"
 	]
 }
