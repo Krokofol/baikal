@@ -2,8 +2,6 @@
 
 
 #include "SurfaceNodeUtils.h"
-#include <iostream>
-#include <fstream>
 
 using namespace std;
 
@@ -36,8 +34,6 @@ void USurfaceNodeUtils::generateTriangles(
 	TArray<int32>& triangles
 ) {
 	triangles = TArray<int32>();
-	ofstream myfile;
-	myfile.open("C:/Autodesk/example.txt");
 
 	for (int x = 0; x < nodesCountX - 1; x++) {
 		for (int y = 0; y < nodesCountY - 1; y++) {
@@ -45,15 +41,12 @@ void USurfaceNodeUtils::generateTriangles(
 			triangles.Add(x * nodesCountY + y);
 			triangles.Add((x + 1) * nodesCountY + y);
 			triangles.Add(x * nodesCountY + (y + 1));
-			myfile << x * nodesCountY + y << ";" << (x + 1)* nodesCountY + y << ";" << x * nodesCountY + (y + 1) << "\n";
 			//second triangle (2, backside)
 			triangles.Add(x * nodesCountY + (y + 1));
 			triangles.Add((x + 1) * nodesCountY + y);
 			triangles.Add((x + 1) * nodesCountY + (y + 1));
-			myfile << x * nodesCountY + (y + 1) << ";" << (x + 1) * nodesCountY + y << ";" << (x + 1) * nodesCountY + (y + 1) << "\n";
 		}
 	}
-	myfile.close();
 	UE_LOG(LogTemp, Display, TEXT("nodes numbers in triangles count is: %d"), triangles.Num());
 	return;
 }
