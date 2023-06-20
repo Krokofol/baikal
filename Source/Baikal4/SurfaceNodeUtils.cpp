@@ -101,12 +101,19 @@ TArray<FVector> USurfaceNodeUtils::takeEach(
 	return actualNodes;
 }
 
-TArray<FLinearColor> USurfaceNodeUtils::colorVertexes(TArray<FVector> nodes)
+TArray<FLinearColor> USurfaceNodeUtils::colorVertexes(TArray<FVector> nodes, int32 zeroH)
 {
+	int32 min = 10000000;
+	for (FVector node : nodes) {
+		if (node.Z < min) {
+			min = node.Z;
+		}
+	}
+	int32 maxDeep = (min - zeroH) * 1.5;
 	TArray<FLinearColor> colors = TArray<FLinearColor>();
 	for (FVector node : nodes)
 	{
-		colors.Add(getColor(node.Z - 430));
+		colors.Add(getColor(node.Z - zeroH, maxDeep));
 	}
 	return colors;
 }
@@ -147,7 +154,7 @@ void USurfaceNodeUtils::addVertex(int32 x, int32 y, int32 z, int32 horizontalSca
 	coordinates.Add(FVector(x * horizontalScale, y * horizontalScale, z));
 }
 
-FLinearColor USurfaceNodeUtils::getColor(double z)
+FLinearColor USurfaceNodeUtils::getColor(double z, int32 maxDeep)
 {
 	// max for baical expected : 2700 - 430 (2270);
 	// min for baical expected : -1198 - 430 (-1628);
@@ -166,11 +173,11 @@ FLinearColor USurfaceNodeUtils::getColor(double z)
 		}
 	}
 	else {
-		if (z > -800) {
-			color = FLinearColor(0.3 * (1 - z / -800), 0.3 * (1 - z / -800), 0.25 * (1 - z / -800) + 0.75);
+		if (z > maxDeep / 2) {
+			color = FLinearColor(0.3 * (1 - z / (maxDeep / 2)), 0.3 * (1 - z / (maxDeep / 2)), 0.25 * (1 - z / (maxDeep / 2)) + 0.75);
 		}
 		else {
-			color = FLinearColor(0, 0, 0.25 + (1 - (z + 800) / -850) * 0.75);
+			color = FLinearColor(0, 0, 0.25 + (1 - (z - maxDeep / 2) / (maxDeep / 2)) * 0.75);
 		}
 	}
 	return color;

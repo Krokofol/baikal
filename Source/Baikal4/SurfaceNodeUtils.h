@@ -47,7 +47,7 @@ class BAIKAL4_API USurfaceNodeUtils : public UBlueprintFunctionLibrary
 		);
 
 		UFUNCTION(BlueprintCallable, Category = "Surface")
-		static TArray<FLinearColor> colorVertexes(TArray<FVector> nodes);
+		static TArray<FLinearColor> colorVertexes(TArray<FVector> nodes, int32 zeroH);
 
 		static FString fileName(FString userDir);
 
@@ -63,5 +63,5 @@ class BAIKAL4_API USurfaceNodeUtils : public UBlueprintFunctionLibrary
 			TArray<FVector>& coordinates
 		);
 
-		static FLinearColor getColor(double z);
+		static FLinearColor getColor(double z, int32 maxDeep);
 };
